@@ -26,7 +26,7 @@ a{color:var(--teal)}
 window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener('unhandledrejection',function(ev){show((ev.reason&&ev.reason.message)||ev.reason)})})();</script>
 <main>
 <h1>MIDI 跟唱音準練習 <span style="font-weight:400">/ Sing-Along Pitch Trainer</span></h1>
-<p class="sub">v1.6 · 練唱室 Practice Room · Harmony Ears App 5<br><a href="sing-along-manual-zh.html">📄 中文說明</a> · <a href="sing-along-manual-en.html">📄 EN Manual</a></p>
+<p class="sub">v1.7e · 練唱室 Practice Room · Harmony Ears App 5<br><a href="sing-along-manual-zh.html">📄 中文說明</a> · <a href="sing-along-manual-en.html">📄 EN Manual</a></p>
 <section><label class="drop" id="drop" for="fi">點擊選取 MIDI 檔（.mid / .midi，可多選）<br><small>一個檔含全部聲部，或每個聲部一個檔，都可以。Tap to choose MIDI files: one file with all parts, or one file per part.</small><input type="file" id="fi" multiple><span class="pill">選擇 MIDI 檔 Choose MIDI</span></label><label class="drop" id="drop2" for="fi2" style="margin-top:8px">匯入單聲部音檔（mp3 / wav / m4a…）<br><small>只適合「單一聲部、沒有伴奏」的錄音，會自動偵測音高當作目標音；多聲部混音的偵測不可靠。 Single-part recordings only (no accompaniment): pitch is detected automatically as the target. Unreliable for polyphonic mixes.</small><input type="file" id="fi2" multiple accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.aif,.aiff,.mp4,.webm,.weba,.wma,audio/*"><span class="pill">選擇音檔 Choose audio</span></label>
 <label class="drop" id="drop3" for="fi3" style="margin-top:8px">匯入樂譜（.musicxml / .mxl，選填）<br><small>純粹用來「看譜跟唱」，會跟目前播放位置同步捲動；不影響播放或音準偵測，可以不匯入。 Optional sheet music for following along — scrolls in sync with playback. Doesn't affect playback or pitch detection; you can skip this.</small><input type="file" id="fi3" accept=".musicxml,.mxl,.xml"><span class="pill">選擇樂譜檔 Choose score</span></label>
 <div class="row"><button id="fsb1" type="button" hidden>📁 MIDI：記住資料夾 Remember folder</button><button id="fsb2" type="button" hidden>📁 音檔：記住資料夾 Remember folder</button></div>
@@ -58,6 +58,7 @@ window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener(
 <div class="note">拖曳滑桿可跳到曲子任何位置，播放中拖曳會立刻從那裡重新播放；停止後再按播放會從停止處繼續。速度與移調在按「播放」（或跳轉）時套用；音量、左右、靜音、我唱的聲部可即時調整。Drag to jump anywhere — while playing it restarts from there; Play resumes from where you stopped. Speed and key apply on Play or jump; volume, pan, mute and "My part" change live.</div></section>
 <section><h2>跟唱 Sing along</h2>
 <button id="pitch" disabled>🎵 起音 Start note</button> <button class="go" id="play" disabled>▶ 播放 Play</button> <button id="mic">🎤 麥克風 Mic</button><span id="lvlbox" title="麥克風音量：超過金色線才會偵測音高 Mic level: pitch is detected above the gold line" style="display:inline-block;position:relative;width:96px;height:12px;border:1px solid var(--line);border-radius:6px;vertical-align:middle;margin-left:8px;overflow:hidden"><span id="lvl" style="display:block;height:100%;width:0;background:#8a8a8f"></span><i style="position:absolute;left:20%;top:0;bottom:0;width:2px;background:#FFB84D"></i></span>
+<label class="note" style="display:block;margin-top:8px"><input type="checkbox" id="ci" checked> 前導拍 Count-in：按播放後先數 4 拍再開始 / 4 clicks before playback　<input type="number" id="cibpm" value="90" min="20" max="400" step="0.1" style="width:76px"> BPM（跟著目標 BPM／速度 % 自動變，可自己改 follows target BPM / speed %, editable）</label>
 <div class="row" style="margin-top:8px"><label style="width:auto">延遲補償 Latency</label><div class="step"><button id="latD" type="button">−</button><span class="sv" id="latv">100 ms</span><button id="latU" type="button">+</button></div></div>
 <div class="note">從你出聲到畫面偵測到會有延遲（偵測約 20 ms，再加上麥克風與耳機；藍牙耳機常有 200–300 ms）。總覺得比線慢，就把數字加大；你唱的線和評分都會一起修正。唱完後評分區會建議數值。 There is a delay between your voice and the screen (analysis ~20 ms plus the mic and headphones; Bluetooth earbuds often add 200–300 ms). If you always seem behind the line, increase it: the line and the score are both corrected. After singing, the result panel suggests a value.</div>
 <div class="note" id="pnote" style="min-height:3em"></div>
@@ -1380,7 +1381,7 @@ hold($('ctD'),()=>{CT=Math.max(-50,CT-1);info()});hold($('ctU'),()=>{CT=Math.min
 $('b1').addEventListener('input',info);$('b1').addEventListener('change',()=>{$('b1').value=P().pct;info()});
 $('b2').addEventListener('input',()=>{const t=+$('b2').value;if(S.bpm0>0&&t>0)$('b1').value=Math.round(t/S.bpm0*10000)/100;info()});
 $('b2').addEventListener('change',()=>{$('b1').value=P().pct;if(S.bpm0)$('b2').value=(S.bpm0*P().tempo).toFixed(1);info()});
-$('rs').onclick=()=>{$('b1').value=100;info()};$('pos').addEventListener('input',()=>{S.drag=true;info()});$('pos').addEventListener('change',()=>{S.drag=false;if(S.playing){stop();$('play').click()}});
+$('rs').onclick=()=>{$('b1').value=100;info()};$('pos').addEventListener('input',()=>{S.drag=true;info()});$('pos').addEventListener('change',()=>{S.drag=false;if(S.playing){stop();window.__noCI=true;$('play').click()}});
 $('rw').onclick=()=>{const w=S.playing;if(w)stop();$('pos').value=0;info();if(w)$('play').click()};
 
 const eff=t=>t.mute?0:(t.id===S.me&&!$('demo').checked?0:t.vol);
@@ -1411,6 +1412,7 @@ async function add(fl){const bad=[];let added=0;
    r.parts.forEach((pt,i)=>{const ms=pt.notes.map(n=>n.m);S.tracks.push({id:S.nid++,name:r.parts.length===1?base:(pt.name||base+' '+(i+1)),notes:pt.notes,vol:1,pan:0,mute:false,file:f.name,lo:Math.min(...ms),hi:Math.max(...ms)});added++})}
   catch(e){bad.push(f.name+'（無法讀取 cannot read）')}}
  {const f=S.tracks.find(x=>!x.accomp);if(S.me==null&&f)S.me=f.id}recalc();render();info();
+ if(S.bpm0){window.__ciBase=+S.bpm0.toFixed(1);window.__ciAuto=true}
  $('fnote').textContent=(added?'已加入 Added '+added+' 個聲部 parts。':'')+(bad.length?'已略過 Skipped：'+bad.join('、'):'')}
 const AUD=/\.(mp3|wav|m4a|aac|flac|ogg|oga|opus|aif|aiff|mp4|webm|weba|wma)$/i,yieldNow=()=>new Promise(r=>setTimeout(r,0));
 async function analyze(buf,prog){
@@ -1557,7 +1559,7 @@ const fmt1=s=>{const m=Math.floor(s/60);return m+':'+(s-m*60).toFixed(1).padStar
 const loopOK=()=>S.loop&&S.A!=null&&S.B!=null&&S.B-S.A>=0.2;
 const curPos=()=>S.playing?playPos():+$('pos').value;
 const startX=()=>{const p=+$('pos').value;return loopOK()&&(p<S.A||p>=S.B)?S.A:p};
-function playPos(){const e=S.ctx.currentTime-S.tStart;if(!S.loopMode||e<S.d0)return S.X+e*S.sp;return S.A0+(((e-S.d0)%S.D)*S.sp)}
+function playPos(){let e=S.ctx.currentTime-S.tStart;if(e<0)e=0;if(!S.loopMode||e<S.d0)return S.X+e*S.sp;return S.A0+(((e-S.d0)%S.D)*S.sp)}
 function modeInfo(){const a=S.tracks.filter(t=>t.kind==='audio');$('amode').textContent=a.length?'音檔聲部播放 Audio parts：'+a.map(t=>t.name+'＝'+(!t.orig?'電子聲模擬 synth':isDefault()?'原聲 original':t.proc?'處理後的原聲 processed voice':'電子聲模擬（處理失敗）synth (failed)')).join('；'):''}
 function sched(from,to,at){const c=S.ctx;S.tracks.forEach(t=>{const o=S.live[t.id];if(!o)return;
  if(t.kind==='audio'&&t.orig){const same=S.sp===1&&S.shift===0,bf=same?t.buf:t.proc;
@@ -1576,7 +1578,7 @@ $('play').onclick=async()=>{if(S.playing){stop();finalizeRec();return}if(S.start
  S.starting=true;$('play').disabled=true;const pt=$('play').textContent;if(!audioReady())$('play').textContent='⏳ 處理音檔中…';try{for(let k=0;k<3&&!audioReady();k++)await ensureAudio()}finally{S.starting=false;$('play').disabled=false;$('play').textContent=pt}
  if(S.playing)return;
  if(!S.rec)$('result').innerHTML='';
- const c=ac();S.sp=P().tempo;S.shift=SM+CT/100;S.trace=[];S.lastPos=0;S.tracks.forEach(t=>t.notes.forEach(n=>{delete n.stat}));S.lastDone=null;S.curNote=null;S.X=startX();$('pos').value=S.X;const tS=c.currentTime+0.3;S.tStart=tS;
+ const c=ac();S.sp=P().tempo;S.shift=SM+CT/100;S.trace=[];S.lastPos=0;S.tracks.forEach(t=>t.notes.forEach(n=>{delete n.stat}));S.lastDone=null;S.curNote=null;S.X=startX();$('pos').value=S.X;const ciN=($('ci').checked&&!window.__noCI)?4:0;window.__noCI=false;const civ=+$('cibpm').value,ciB=60/(civ>0?civ:90),t0=c.currentTime+0.3,tS=t0+ciN*ciB;S.tStart=tS;if(ciN)for(let i=0;i<ciN;i++){const ct=t0+i*ciB,co=c.createOscillator(),cg=c.createGain();co.type='sine';co.frequency.value=i===0?1760:1320;cg.gain.setValueAtTime(0.0001,ct);cg.gain.linearRampToValueAtTime(0.35,ct+0.004);cg.gain.exponentialRampToValueAtTime(0.0001,ct+0.08);co.connect(cg);cg.connect(c.destination);co.start(ct);co.stop(ct+0.1);co.onended=()=>{co._d=1};S.oscs.push(co)}
  const m=c.createGain(),lim=c.createDynamicsCompressor();lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.003;lim.release.value=0.15;
  m.gain.setValueAtTime(0,tS-0.1);m.gain.linearRampToValueAtTime(0.9/Math.max(1,Math.sqrt(S.tracks.length)),tS);m.connect(lim);lim.connect(c.destination);
  S.tracks.forEach(t=>{const g=c.createGain(),pn=c.createStereoPanner();g.gain.value=eff(t);pn.pan.value=t.pan;g.connect(pn);pn.connect(m);S.live[t.id]={g,pn}});
@@ -1585,7 +1587,7 @@ $('play').onclick=async()=>{if(S.playing){stop();finalizeRec();return}if(S.start
  else sched(S.X,Infinity,tS);
  $('play').textContent='■ 停止 Stop';$('play').classList.add('on')};
 function loopInfo(){$('abt').textContent='A：'+(S.A==null?'—':fmt1(S.A))+'　B：'+(S.B==null?'—':fmt1(S.B))+'　'+(S.loop?(loopOK()?'🔁 反覆中 Looping':'⚠ 請設定 A 與 B Set A and B'):'');$('lp').classList.toggle('on',S.loop)}
-function changed(){loopInfo();startInfo();clearTimeout(S.rt);if(S.playing)S.rt=setTimeout(()=>{if(S.playing&&(S.loopMode||loopOK())){const p=curPos();stop();$('pos').value=p;info();$('play').click()}},300)}
+function changed(){loopInfo();startInfo();clearTimeout(S.rt);if(S.playing)S.rt=setTimeout(()=>{if(S.playing&&(S.loopMode||loopOK())){const p=curPos();stop();$('pos').value=p;info();window.__noCI=true;$('play').click()}},300)}
 const r1=x=>Math.round(x*10)/10,cl=x=>Math.min(S.total,Math.max(0,r1(x)));
 $('sa').onclick=()=>{S.A=cl(curPos());if(S.B!=null&&S.B-S.A<0.2)S.B=null;changed()};
 $('sb').onclick=()=>{S.B=cl(curPos());if(S.A!=null&&S.B-S.A<0.2)S.A=null;changed()};
@@ -1741,6 +1743,7 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
     }
     tempoMap = buildTempoMap(xmlText);
     window.__osmdDebug = {osmd, tempoMap, secToWhole};
+    if(!S.bpm0){const sb=240/tempoMap.segs[0].secPerWhole;window.__ciBase=+sb.toFixed(1);window.__ciAuto=true}
     const sel = $('scorePart');
     sel.innerHTML = '';
     osmd.Sheet.Instruments.forEach((inst,i)=>{
@@ -1867,6 +1870,6 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
   window.addEventListener('resize', ()=>{ if(osmd && $('scorePart').value!=='') showPart($('scorePart').value); });
 })();
 
-latUI();loopInfo();info();frame();
+try{const v=localStorage.getItem('tcmc-sing-ci');if(v!==null)$('ci').checked=v==='1'}catch(e){}$('ci').onchange=()=>{try{localStorage.setItem('tcmc-sing-ci',$('ci').checked?'1':'0')}catch(e){}};latUI();loopInfo();info();frame();
 })();
-</script></body></html>
+</script><script>window.__ciBase=90;window.__ciAuto=true;(function(){var ci=document.getElementById('cibpm');ci.addEventListener('input',function(){window.__ciAuto=false});setInterval(function(){try{if(!window.__ciAuto||document.activeElement===ci)return;var p=+document.getElementById('b1').value;if(!(p>0))return;ci.value=(Math.round(window.__ciBase*p)/100).toFixed(1)}catch(x){}},200)})()</script></body></html>
