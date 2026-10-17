@@ -26,7 +26,7 @@ a{color:var(--teal)}
 window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener('unhandledrejection',function(ev){show((ev.reason&&ev.reason.message)||ev.reason)})})();</script>
 <main>
 <h1>MIDI 跟唱音準練習 <span style="font-weight:400">/ Sing-Along Pitch Trainer</span></h1>
-<p class="sub">v1.7e · 練唱室 Practice Room · Harmony Ears App 5<br><a href="sing-along-manual-zh.html">📄 中文說明</a> · <a href="sing-along-manual-en.html">📄 EN Manual</a></p>
+<p class="sub">v1.8a · 練唱室 Practice Room · Harmony Ears App 5<br><a href="sing-along-manual-zh.html">📄 中文說明</a> · <a href="sing-along-manual-en.html">📄 EN Manual</a></p>
 <section><label class="drop" id="drop" for="fi">點擊選取 MIDI 檔（.mid / .midi，可多選）<br><small>一個檔含全部聲部，或每個聲部一個檔，都可以。Tap to choose MIDI files: one file with all parts, or one file per part.</small><input type="file" id="fi" multiple><span class="pill">選擇 MIDI 檔 Choose MIDI</span></label><label class="drop" id="drop2" for="fi2" style="margin-top:8px">匯入單聲部音檔（mp3 / wav / m4a…）<br><small>只適合「單一聲部、沒有伴奏」的錄音，會自動偵測音高當作目標音；多聲部混音的偵測不可靠。 Single-part recordings only (no accompaniment): pitch is detected automatically as the target. Unreliable for polyphonic mixes.</small><input type="file" id="fi2" multiple accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.aif,.aiff,.mp4,.webm,.weba,.wma,audio/*"><span class="pill">選擇音檔 Choose audio</span></label>
 <label class="drop" id="drop3" for="fi3" style="margin-top:8px">匯入樂譜（.musicxml / .mxl，選填）<br><small>純粹用來「看譜跟唱」，會跟目前播放位置同步捲動；不影響播放或音準偵測，可以不匯入。 Optional sheet music for following along — scrolls in sync with playback. Doesn't affect playback or pitch detection; you can skip this.</small><input type="file" id="fi3" accept=".musicxml,.mxl,.xml"><span class="pill">選擇樂譜檔 Choose score</span></label>
 <div class="row"><button id="fsb1" type="button" hidden>📁 MIDI：記住資料夾 Remember folder</button><button id="fsb2" type="button" hidden>📁 音檔：記住資料夾 Remember folder</button></div>
@@ -58,7 +58,7 @@ window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener(
 <div class="note">拖曳滑桿可跳到曲子任何位置，播放中拖曳會立刻從那裡重新播放；停止後再按播放會從停止處繼續。速度與移調在按「播放」（或跳轉）時套用；音量、左右、靜音、我唱的聲部可即時調整。Drag to jump anywhere — while playing it restarts from there; Play resumes from where you stopped. Speed and key apply on Play or jump; volume, pan, mute and "My part" change live.</div></section>
 <section><h2>跟唱 Sing along</h2>
 <button id="pitch" disabled>🎵 起音 Start note</button> <button class="go" id="play" disabled>▶ 播放 Play</button> <button id="mic">🎤 麥克風 Mic</button><span id="lvlbox" title="麥克風音量：超過金色線才會偵測音高 Mic level: pitch is detected above the gold line" style="display:inline-block;position:relative;width:96px;height:12px;border:1px solid var(--line);border-radius:6px;vertical-align:middle;margin-left:8px;overflow:hidden"><span id="lvl" style="display:block;height:100%;width:0;background:#8a8a8f"></span><i style="position:absolute;left:20%;top:0;bottom:0;width:2px;background:#FFB84D"></i></span>
-<label class="note" style="display:block;margin-top:8px"><input type="checkbox" id="ci" checked> 前導拍 Count-in：按播放後先數 4 拍再開始 / 4 clicks before playback　<input type="number" id="cibpm" value="90" min="20" max="400" step="0.1" style="width:76px"> BPM（跟著目標 BPM／速度 % 自動變，可自己改 follows target BPM / speed %, editable）</label>
+<label class="note" style="display:block;margin-top:8px"><input type="checkbox" id="ci" checked> 前導拍 Count-in：按播放後先數 4 拍再開始 / 4 clicks before playback　拍數 beats <input type="number" id="cibeats" value="4" min="1" max="12" step="1" style="width:56px"> ｜ <input type="number" id="cibpm" value="90" min="20" max="400" step="0.1" style="width:76px"> BPM（跟著目標 BPM／速度 % 自動變，可自己改 follows target BPM / speed %, editable）</label>
 <div class="row" style="margin-top:8px"><label style="width:auto">延遲補償 Latency</label><div class="step"><button id="latD" type="button">−</button><span class="sv" id="latv">100 ms</span><button id="latU" type="button">+</button></div></div>
 <div class="note">從你出聲到畫面偵測到會有延遲（偵測約 20 ms，再加上麥克風與耳機；藍牙耳機常有 200–300 ms）。總覺得比線慢，就把數字加大；你唱的線和評分都會一起修正。唱完後評分區會建議數值。 There is a delay between your voice and the screen (analysis ~20 ms plus the mic and headphones; Bluetooth earbuds often add 200–300 ms). If you always seem behind the line, increase it: the line and the score are both corrected. After singing, the result panel suggests a value.</div>
 <div class="note" id="pnote" style="min-height:3em"></div>
@@ -71,7 +71,7 @@ window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener(
     <span class="note" id="scoreNote" style="font-size:11px"></span>
   </div>
   <div id="scoreWrap" style="width:100%;height:112px;overflow:hidden;position:relative;background:#fdfcf8;border-radius:8px;margin-bottom:8px;border:1px solid var(--line)">
-    <div id="scoreInner" style="position:absolute;left:0;top:0;height:100%;transition:left .2s linear;"></div>
+    <div id="scoreInner" style="position:absolute;left:0;top:0;height:100%;transition:left .1s linear;"></div>
   </div>
 </div>
 <canvas id="roll" width="720" height="240"></canvas><canvas id="spec" width="720" height="90"></canvas>
@@ -1344,12 +1344,12 @@ function parseMidi(buf){
  const vlq=()=>{let v=0,b;do{b=d.getUint8(p++);v=(v<<7)|(b&127)}while(b&128);return v};
  if(s4()!=='MThd')throw new Error('not midi');p+=4;const n=d.getUint16(p+2),div=d.getUint16(p+4);p+=6;
  if(div&0x8000)throw new Error('SMPTE time not supported');
- const tempos=[[0,500000]],raw=[];
+ const tempos=[[0,500000]],raw=[];let tsig=null;
  for(let i=0;i<n&&p<d.byteLength;i++){
   if(s4()!=='MTrk')break;const len=d.getUint32(p);p+=4;const end=Math.min(p+len,d.byteLength);
   let tick=0,run=0,name='';const on={},notes=[];
   while(p<end){tick+=vlq();let st=d.getUint8(p);if(st<128)st=run;else{p++;if(st<0xF0)run=st}
-   if(st===0xFF){const ty=d.getUint8(p++),l=vlq();if(ty===0x51)tempos.push([tick,(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2)]);if(ty===3&&!name)name=new TextDecoder().decode(new Uint8Array(buf,p,l));p+=l}
+   if(st===0xFF){const ty=d.getUint8(p++),l=vlq();if(ty===0x58&&!tsig&&l>=2)tsig=[d.getUint8(p),1<<d.getUint8(p+1)];if(ty===0x51)tempos.push([tick,(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2)]);if(ty===3&&!name)name=new TextDecoder().decode(new Uint8Array(buf,p,l));p+=l}
    else if(st===0xF0||st===0xF7){p+=vlq()}
    else{const hi=st&0xF0,ch=st&15,a=d.getUint8(p++),b=(hi===0xC0||hi===0xD0)?0:d.getUint8(p++),k=a+(ch<<7);
     if(hi===0x90&&b>0){on[k]=tick}else if(hi===0x80||(hi===0x90&&b===0)){if(on[k]!=null){if(ch!==9)notes.push({t0:on[k],t1:tick,m:a,ch});delete on[k]}}}}
@@ -1361,7 +1361,7 @@ function parseMidi(buf){
  let parts=raw.filter(r=>r.notes.length);
  if(parts.length===1){const chs=[...new Set(parts[0].notes.map(x=>x.ch))].sort((a,b)=>a-b);if(chs.length>1){const nm=parts[0].name||'MIDI';parts=chs.map(c=>({name:nm+' ch'+(c+1),notes:parts[0].notes.filter(x=>x.ch===c)}))}}
  parts.forEach(pt=>{pt.notes.forEach(o=>{o.s0=toSec(o.t0);o.s1=toSec(o.t1)});pt.notes.sort((a,b)=>a.s0-b.s0)});
- return{parts,bpm}}
+ return{parts,bpm,tsig}}
 
 const P=()=>{let v=+$('b1').value;if(!(v>0))v=100;v=Math.min(200,Math.max(25,v));return{tempo:v/100,pct:v}};
 function info(){const p=P(),tc=SM*100+CT,sg=v=>(v>0?'+':'')+v,b=S.bpm0,L=S.total;
@@ -1408,7 +1408,7 @@ function render(){const L=$('list');L.innerHTML='';
 async function add(fl){const bad=[];let added=0;
  for(const f of fl){if(!/\.midi?$/i.test(f.name)&&!/midi/i.test(f.type||'')){bad.push(f.name+'（不是 MIDI not MIDI）');continue}
   try{const r=parseMidi(await f.arrayBuffer());if(!r.parts.length){bad.push(f.name+'（沒有音符 no notes）');continue}
-   if(!S.bpm0)S.bpm0=r.bpm;const base=f.name.replace(/\.[^/.]+$/,'');
+   if(!S.bpm0){S.bpm0=r.bpm;if(r.tsig)window.__setCiTS(r.tsig[0],r.tsig[1])}const base=f.name.replace(/\.[^/.]+$/,'');
    r.parts.forEach((pt,i)=>{const ms=pt.notes.map(n=>n.m);S.tracks.push({id:S.nid++,name:r.parts.length===1?base:(pt.name||base+' '+(i+1)),notes:pt.notes,vol:1,pan:0,mute:false,file:f.name,lo:Math.min(...ms),hi:Math.max(...ms)});added++})}
   catch(e){bad.push(f.name+'（無法讀取 cannot read）')}}
  {const f=S.tracks.find(x=>!x.accomp);if(S.me==null&&f)S.me=f.id}recalc();render();info();
@@ -1578,7 +1578,7 @@ $('play').onclick=async()=>{if(S.playing){stop();finalizeRec();return}if(S.start
  S.starting=true;$('play').disabled=true;const pt=$('play').textContent;if(!audioReady())$('play').textContent='⏳ 處理音檔中…';try{for(let k=0;k<3&&!audioReady();k++)await ensureAudio()}finally{S.starting=false;$('play').disabled=false;$('play').textContent=pt}
  if(S.playing)return;
  if(!S.rec)$('result').innerHTML='';
- const c=ac();S.sp=P().tempo;S.shift=SM+CT/100;S.trace=[];S.lastPos=0;S.tracks.forEach(t=>t.notes.forEach(n=>{delete n.stat}));S.lastDone=null;S.curNote=null;S.X=startX();$('pos').value=S.X;const ciN=($('ci').checked&&!window.__noCI)?4:0;window.__noCI=false;const civ=+$('cibpm').value,ciB=60/(civ>0?civ:90),t0=c.currentTime+0.3,tS=t0+ciN*ciB;S.tStart=tS;if(ciN)for(let i=0;i<ciN;i++){const ct=t0+i*ciB,co=c.createOscillator(),cg=c.createGain();co.type='sine';co.frequency.value=i===0?1760:1320;cg.gain.setValueAtTime(0.0001,ct);cg.gain.linearRampToValueAtTime(0.35,ct+0.004);cg.gain.exponentialRampToValueAtTime(0.0001,ct+0.08);co.connect(cg);cg.connect(c.destination);co.start(ct);co.stop(ct+0.1);co.onended=()=>{co._d=1};S.oscs.push(co)}
+ const c=ac();S.sp=P().tempo;S.shift=SM+CT/100;S.trace=[];S.lastPos=0;S.tracks.forEach(t=>t.notes.forEach(n=>{delete n.stat}));S.lastDone=null;S.curNote=null;S.X=startX();$('pos').value=S.X;const cbn=Math.max(1,Math.min(12,Math.round(+$('cibeats').value)||4)),ciN=($('ci').checked&&!window.__noCI)?cbn:0;window.__noCI=false;const civ=+$('cibpm').value,ciB=60/(civ>0?civ:90),t0=c.currentTime+0.3,tS=t0+ciN*ciB;S.tStart=tS;if(ciN)for(let i=0;i<ciN;i++){const ct=t0+i*ciB,co=c.createOscillator(),cg=c.createGain();co.type='sine';co.frequency.value=(i===0||(window.__ciComp&&i%3===0))?1760:1320;cg.gain.setValueAtTime(0.0001,ct);cg.gain.linearRampToValueAtTime(0.35,ct+0.004);cg.gain.exponentialRampToValueAtTime(0.0001,ct+0.08);co.connect(cg);cg.connect(c.destination);co.start(ct);co.stop(ct+0.1);co.onended=()=>{co._d=1};S.oscs.push(co)}
  const m=c.createGain(),lim=c.createDynamicsCompressor();lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.003;lim.release.value=0.15;
  m.gain.setValueAtTime(0,tS-0.1);m.gain.linearRampToValueAtTime(0.9/Math.max(1,Math.sqrt(S.tracks.length)),tS);m.connect(lim);lim.connect(c.destination);
  S.tracks.forEach(t=>{const g=c.createGain(),pn=c.createStereoPanner();g.gain.value=eff(t);pn.pan.value=t.pan;g.connect(pn);pn.connect(m);S.live[t.id]={g,pn}});
@@ -1741,7 +1741,7 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
       xmlText = await file.text();
       await osmd.load(xmlText);
     }
-    tempoMap = buildTempoMap(xmlText);
+    tempoMap = buildTempoMap(xmlText);if(!S.bpm0){const tm0=xmlText.match(/<beats>(\d+)<\/beats>\s*<beat-type>(\d+)<\/beat-type>/);if(tm0)window.__setCiTS(+tm0[1],+tm0[2])}
     window.__osmdDebug = {osmd, tempoMap, secToWhole};
     if(!S.bpm0){const sb=240/tempoMap.segs[0].secPerWhole;window.__ciBase=+sb.toFixed(1);window.__ciAuto=true}
     const sel = $('scorePart');
@@ -1815,7 +1815,7 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
     osmd.zoom = 0.55;
     osmd.render();
     osmd.cursor.show();
-    lastMeasureShown = -1;
+    lastMeasureShown = -1; window.__scSm = null;
   }
 
   let syncFrameCounter = 0;
@@ -1827,8 +1827,16 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
     // almost always gets skipped too). A frame counter has exactly one call site driving it, so
     // there's no race: every 9th tick (~150ms at 60fps) actually runs the sync logic.
     syncFrameCounter++;
-    if(syncFrameCounter % 9 !== 0) return;
+    if(syncFrameCounter % 2 !== 0) return;
     const targetWhole = secToWhole(tempoMap, Math.max(0,posSec));
+    // smooth scroll: while still inside the same note's time span, only interpolate (no cursor walk)
+    const sm = window.__scSm;
+    if(sm && targetWhole >= sm.t0 && targetWhole < sm.t1){
+      const fr = (targetWhole - sm.t0)/(sm.t1 - sm.t0);
+      const x = sm.x0 + fr*(sm.x1 - sm.x0);
+      $('scoreInner').style.left = (-Math.max(0, x - $('scoreWrap').clientWidth*0.25))+'px';
+      return;
+    }
     // reset + fast-forward to the right spot (cheap for a piece this size)
     osmd.cursor.reset();
     let guard = 0, stepped = false;
@@ -1852,7 +1860,20 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
       const curEl = osmd.cursor.cursorElement;
       if(curEl){
         const curLeft = curEl.offsetLeft;
-        const targetScroll = Math.max(0, curLeft - wrapEl.clientWidth*0.25);
+        const t0 = osmd.cursor.iterator.currentTimeStamp.RealValue;
+        let x1 = curLeft, t1 = t0 + 1e9;
+        try{
+          osmd.cursor.next();
+          if(!osmd.cursor.iterator.endReached){
+            const e2 = osmd.cursor.cursorElement;
+            const tn = osmd.cursor.iterator.currentTimeStamp.RealValue;
+            if(e2 && tn > t0){ x1 = e2.offsetLeft; t1 = tn; }
+          }
+          osmd.cursor.previous();
+        }catch(er){}
+        window.__scSm = { t0: t0, t1: t1, x0: curLeft, x1: x1 };
+        const fr0 = (t1 < t0 + 1e8) ? Math.max(0, Math.min(1, (targetWhole - t0)/(t1 - t0))) : 0;
+        const targetScroll = Math.max(0, curLeft + fr0*(x1 - curLeft) - wrapEl.clientWidth*0.25);
         innerEl.style.left = (-targetScroll)+'px';
       }
     }catch(e){}
@@ -1872,4 +1893,4 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
 
 try{const v=localStorage.getItem('tcmc-sing-ci');if(v!==null)$('ci').checked=v==='1'}catch(e){}$('ci').onchange=()=>{try{localStorage.setItem('tcmc-sing-ci',$('ci').checked?'1':'0')}catch(e){}};latUI();loopInfo();info();frame();
 })();
-</script><script>window.__ciBase=90;window.__ciAuto=true;(function(){var ci=document.getElementById('cibpm');ci.addEventListener('input',function(){window.__ciAuto=false});setInterval(function(){try{if(!window.__ciAuto||document.activeElement===ci)return;var p=+document.getElementById('b1').value;if(!(p>0))return;ci.value=(Math.round(window.__ciBase*p)/100).toFixed(1)}catch(x){}},200)})()</script></body></html>
+</script><script>window.__ciBase=90;window.__ciAuto=true;(function(){var ci=document.getElementById('cibpm');ci.addEventListener('input',function(){window.__ciAuto=false});setInterval(function(){try{if(!window.__ciAuto||document.activeElement===ci)return;var p=+document.getElementById('b1').value;if(!(p>0))return;ci.value=(Math.round(window.__ciBase*p)/100).toFixed(1)}catch(x){}},200)})()</script><script>window.__ciComp=false;window.__ciBeatAuto=true;window.__setCiTS=function(n,d){window.__ciTSd=d;if(!window.__ciBeatAuto||!(n>0))return;var c=(d===8&&n>=6&&n%3===0);window.__ciComp=c;document.getElementById('cibeats').value=n};document.getElementById('cibeats').addEventListener('input',function(){window.__ciBeatAuto=false;var v=+this.value;window.__ciComp=(v>=6&&v%3===0)})</script></body></html>
