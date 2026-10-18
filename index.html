@@ -20,13 +20,14 @@ canvas{width:100%;display:block;background:var(--cv);border-radius:6px;margin-to
 a{color:var(--teal)}
 .pill{display:inline-block;margin-top:10px;padding:8px 18px;border:1.5px solid var(--teal);border-radius:20px;color:var(--teal);font-size:14px}#fsb,#fsb1,#fsb2{margin-top:8px}
 .res{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}.res .big{font-size:26px;font-weight:700;color:var(--gold)}.res table{border-collapse:collapse;margin:8px 0;font-size:14px}.res td{padding:3px 14px 3px 0}
+#scoreInner img[id^="cursorImg"]{opacity:0!important}
 </style></head><body>
 <div id="errbar" style="display:none;position:sticky;top:0;z-index:9;background:#5a1d1d;color:#fff;padding:8px 12px;font-size:13px"></div>
 <script>(function(){function show(t){var e=document.getElementById('errbar');if(e){e.style.display='block';e.textContent='⚠ 程式錯誤 Script error：'+t+'（請把這行文字告訴開發者 please report this line）'}}
 window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener('unhandledrejection',function(ev){show((ev.reason&&ev.reason.message)||ev.reason)})})();</script>
 <main>
 <h1>MIDI 跟唱音準練習 <span style="font-weight:400">/ Sing-Along Pitch Trainer</span></h1>
-<p class="sub">v1.8a · 練唱室 Practice Room · Harmony Ears App 5<br><a href="sing-along-manual-zh.html">📄 中文說明</a> · <a href="sing-along-manual-en.html">📄 EN Manual</a></p>
+<p class="sub">v1.9a · 練唱室 Practice Room · Harmony Ears App 5<br><a href="sing-along-manual-zh.html">📄 中文說明</a> · <a href="sing-along-manual-en.html">📄 EN Manual</a></p>
 <section><label class="drop" id="drop" for="fi">點擊選取 MIDI 檔（.mid / .midi，可多選）<br><small>一個檔含全部聲部，或每個聲部一個檔，都可以。Tap to choose MIDI files: one file with all parts, or one file per part.</small><input type="file" id="fi" multiple><span class="pill">選擇 MIDI 檔 Choose MIDI</span></label><label class="drop" id="drop2" for="fi2" style="margin-top:8px">匯入單聲部音檔（mp3 / wav / m4a…）<br><small>只適合「單一聲部、沒有伴奏」的錄音，會自動偵測音高當作目標音；多聲部混音的偵測不可靠。 Single-part recordings only (no accompaniment): pitch is detected automatically as the target. Unreliable for polyphonic mixes.</small><input type="file" id="fi2" multiple accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.aif,.aiff,.mp4,.webm,.weba,.wma,audio/*"><span class="pill">選擇音檔 Choose audio</span></label>
 <label class="drop" id="drop3" for="fi3" style="margin-top:8px">匯入樂譜（.musicxml / .mxl，選填）<br><small>純粹用來「看譜跟唱」，會跟目前播放位置同步捲動；不影響播放或音準偵測，可以不匯入。 Optional sheet music for following along — scrolls in sync with playback. Doesn't affect playback or pitch detection; you can skip this.</small><input type="file" id="fi3" accept=".musicxml,.mxl,.xml"><span class="pill">選擇樂譜檔 Choose score</span></label>
 <div class="row"><button id="fsb1" type="button" hidden>📁 MIDI：記住資料夾 Remember folder</button><button id="fsb2" type="button" hidden>📁 音檔：記住資料夾 Remember folder</button></div>
@@ -71,7 +72,7 @@ window.onerror=function(m,s,l){show(m+' (line '+l+')')};window.addEventListener(
     <span class="note" id="scoreNote" style="font-size:11px"></span>
   </div>
   <div id="scoreWrap" style="width:100%;height:112px;overflow:hidden;position:relative;background:#fdfcf8;border-radius:8px;margin-bottom:8px;border:1px solid var(--line)">
-    <div id="scoreInner" style="position:absolute;left:0;top:0;height:100%;transition:left .1s linear;"></div>
+    <div id="scoreInner" style="position:absolute;left:0;top:0;height:100%;transition:none;"></div>
   </div>
 </div>
 <canvas id="roll" width="720" height="240"></canvas><canvas id="spec" width="720" height="90"></canvas>
@@ -1827,13 +1828,13 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
     // almost always gets skipped too). A frame counter has exactly one call site driving it, so
     // there's no race: every 9th tick (~150ms at 60fps) actually runs the sync logic.
     syncFrameCounter++;
-    if(syncFrameCounter % 2 !== 0) return;
     const targetWhole = secToWhole(tempoMap, Math.max(0,posSec));
     // smooth scroll: while still inside the same note's time span, only interpolate (no cursor walk)
     const sm = window.__scSm;
     if(sm && targetWhole >= sm.t0 && targetWhole < sm.t1){
       const fr = (targetWhole - sm.t0)/(sm.t1 - sm.t0);
       const x = sm.x0 + fr*(sm.x1 - sm.x0);
+      const ln0=document.getElementById('scoreLine'); if(ln0) ln0.style.left=(x-1.5)+'px';
       $('scoreInner').style.left = (-Math.max(0, x - $('scoreWrap').clientWidth*0.25))+'px';
       return;
     }
@@ -1859,7 +1860,7 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
       const wrapEl = $('scoreWrap'), innerEl = $('scoreInner');
       const curEl = osmd.cursor.cursorElement;
       if(curEl){
-        const curLeft = curEl.offsetLeft;
+        const curLeft = curEl.offsetLeft + curEl.offsetWidth/2;
         const t0 = osmd.cursor.iterator.currentTimeStamp.RealValue;
         let x1 = curLeft, t1 = t0 + 1e9;
         try{
@@ -1867,11 +1868,16 @@ function frame(){requestAnimationFrame(frame);const c=S.ctx;let pos=+$('pos').va
           if(!osmd.cursor.iterator.endReached){
             const e2 = osmd.cursor.cursorElement;
             const tn = osmd.cursor.iterator.currentTimeStamp.RealValue;
-            if(e2 && tn > t0){ x1 = e2.offsetLeft; t1 = tn; }
+            if(e2 && tn > t0){ x1 = e2.offsetLeft + e2.offsetWidth/2; t1 = tn; }
           }
           osmd.cursor.previous();
         }catch(er){}
         window.__scSm = { t0: t0, t1: t1, x0: curLeft, x1: x1 };
+        let ln=document.getElementById('scoreLine');
+        if(!ln||ln.parentNode!==curEl.parentNode){ if(ln) ln.remove(); ln=document.createElement('div');ln.id='scoreLine';ln.style.cssText='position:absolute;width:3px;background:#F5922F;border-radius:2px;pointer-events:none;z-index:5';curEl.parentNode.appendChild(ln)}
+        ln.style.top=curEl.offsetTop+'px';ln.style.height=curEl.offsetHeight+'px';
+        const frl=(t1 < t0 + 1e8) ? Math.max(0, Math.min(1, (targetWhole - t0)/(t1 - t0))) : 0;
+        ln.style.left=(curLeft+frl*(x1-curLeft)-1.5)+'px';
         const fr0 = (t1 < t0 + 1e8) ? Math.max(0, Math.min(1, (targetWhole - t0)/(t1 - t0))) : 0;
         const targetScroll = Math.max(0, curLeft + fr0*(x1 - curLeft) - wrapEl.clientWidth*0.25);
         innerEl.style.left = (-targetScroll)+'px';
